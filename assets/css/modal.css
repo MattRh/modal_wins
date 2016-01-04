@@ -1,0 +1,85 @@
+/* Example */
+body{
+position:relative;
+display:block;
+-webkit-font-smoothing:subpixel-antialiased;
+font-family:Arial,Helvetica,Tahoma;
+margin:0;
+padding:0
+}
+button{
+display:block;
+padding:3px;
+margin:5px auto;
+}
+.modal.Example{
+background:#171717;
+border-radius:4px
+}
+/* Necessary */
+#modal-box{
+position:fixed;
+overflow:auto;
+top:0;
+right:0;
+bottom:0;
+left:0;
+z-index:100;
+background-color:rgba(0,0,0,0.075) /* Unnecessary */
+}
+#modal-backdrop{
+position:fixed;
+top:0;
+right:0;
+bottom:0;
+left:0;
+z-index:90
+}
+#modal-wrapper{
+position:relative;
+height:100%;
+margin:0 auto
+}
+#modal-wrapper tr{
+position:relative;
+vertical-align:middle;
+margin:0;
+padding:0
+}
+#modal-wrapper td{
+position:relative;
+padding:15px 0; /* Unnecessary */
+margin:0;
+border:0;
+vertical-align:middle
+}
+.modal{
+position:relative;
+opacity:0;
+z-index:100;
+/* Unnecessary */
+width:600px; 
+padding:24px 0
+}
+/* Unnecessary */
+.modal-title{
+display:table;
+line-height:26px;
+margin:auto;
+padding:0 13px;
+background:#222;
+font-size:15px;
+color:#fff;
+-webkit-user-select:none;
+-khtml-user-select:none;
+-moz-user-select:none;
+-ms-user-select:none;
+-o-user-select:none
+}
+.modal-body{
+width:80%;
+padding:30px;
+margin:154px auto 130px;
+background:rgba(255,255,255,0.05);
+border-radius:3px;
+}

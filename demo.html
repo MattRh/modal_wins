@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang=ru-RU>
+<head>
+	<meta charset='utf-8'>
+	<title>Modal windows script by MattRh</title>
+	<meta name=author content='sergejrf@gmail.com'>
+	<link href='assets/css/modal.css' rel='stylesheet'>
+	<script type='text/javascript' src='assets/js/modal.js'></script>
+</head>
+<body>
+
+<button onclick='modal.show("firstModal")'>Show first</button>
+
+<div id=firstModal class='modal Example'>
+	<div class=modal-title>First modal</div>
+	<div class=modal-body>
+		<button onclick='modal.switchTo("secondModal")'>Go to second</button>
+	</div>
+</div>
+<div id=secondModal class='modal Example'>
+	<div class=modal-title>Second window</div>
+	<div class=modal-body>
+		<button onclick='modal.hide()'>Close modal</button>
+		<button onclick='modal.switchTo("firstModal")'>Go to first</button>
+	</div>
+</div>
+
+<div id=modal-box style='display:none; opacity:0'>
+	<div id=modal-backdrop onclick='modal.hide()'></div>
+	<table id=modal-wrapper><tr><td></td></tr></table>
+</div>
+
+<body>
+</html>
