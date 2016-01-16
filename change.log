@@ -1,3 +1,5 @@
+v1.3.1
+ + Added modal opening by hash in url (adjusting in config)
 v1.3
  + Now with subwindows (they have same structure as main box)
  + "ESC" now also closes last window (adjusting in config)

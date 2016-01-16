@@ -14,7 +14,9 @@ var modal = {
 		modalsClass: '.modal',
 		modalsCont: '.modal-wrapper > tbody > tr > td',
 		// Key code. Null to disable
-		hideByKey: 27
+		hideByKey: 27,
+		// URL hash prefix for modal anchor. Null to disable
+		urlPrefix: ''
 	},
 	tStamps: [],
 	init: function() {
@@ -30,6 +32,7 @@ var modal = {
 		
 		this.__modalsCollect();
 		this.__scrollSet();
+		this.__anchorOpen();
 	},
 	show: function(e, s) { // element, switch
 		//console.time('show_time');
@@ -64,7 +67,7 @@ var modal = {
 		this.__animate(mainStyle, {'opacity': 1}, 200, 'main');
 		this.__modalShow(el);
 		
-		if(this.config.hideByKey)
+		if(this.config.hideByKey !== null)
 			window.addEventListener('keyup', modal.__keyPress);
 		//console.timeEnd('show_time');
 	},
@@ -200,6 +203,18 @@ var modal = {
 
 			cont.appendChild(modals[i]);
 			modals[i].style.display = 'none';
+		}
+	},
+	__anchorOpen: function() {
+		var anc;
+		
+		if(this.config.urlPrefix !== null) {
+			anc = window.location.hash.replace('#', '');
+			if(anc != '' && anc.substr(0, this.config.urlPrefix.length) == this.config.urlPrefix) {
+				el = document.getElementById(anc);
+				if(el != null && el.className.match(this.modalRegExp))
+					modal.show(anc);
+			}
 		}
 	}
 };
