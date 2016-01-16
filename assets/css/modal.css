@@ -1,4 +1,45 @@
-/* Example */
+/* Necessary styles */
+.modal-box{
+position:fixed;
+overflow:auto;
+top:0;
+right:0;
+bottom:0;
+left:0;
+z-index:100
+}
+.modal-backdrop{
+position:fixed;
+top:0;
+right:0;
+bottom:0;
+left:0;
+z-index:90
+}
+.modal-wrapper{
+position:relative;
+height:100%;
+margin:0 auto;
+border-spacing:0
+}
+.modal-wrapper tr{
+position:relative;
+vertical-align:middle;
+margin:0;
+padding:0
+}
+.modal-wrapper td{
+position:relative;
+margin:0;
+border:0;
+vertical-align:middle
+}
+.modal{
+position:relative;
+opacity:0;
+z-index:100
+}
+/* Example styles */
 body{
 position:relative;
 display:block;
@@ -12,74 +53,39 @@ display:block;
 padding:3px;
 margin:5px auto;
 }
-.modal.Example{
-background:#171717;
-border-radius:4px
+.Example.modal-box{
+background-color:rgba(0,0,0,0.175)
 }
-/* Necessary */
-#modal-box{
-position:fixed;
-overflow:auto;
-top:0;
-right:0;
-bottom:0;
-left:0;
-z-index:100;
-background-color:rgba(0,0,0,0.075) /* Unnecessary */
+.Example .modal-wrapper td{
+padding:15px 0;
 }
-#modal-backdrop{
-position:fixed;
-top:0;
-right:0;
-bottom:0;
-left:0;
-z-index:90
-}
-#modal-wrapper{
-position:relative;
-height:100%;
-margin:0 auto
-}
-#modal-wrapper tr{
-position:relative;
-vertical-align:middle;
-margin:0;
-padding:0
-}
-#modal-wrapper td{
-position:relative;
-padding:15px 0; /* Unnecessary */
-margin:0;
-border:0;
-vertical-align:middle
-}
-.modal{
-position:relative;
-opacity:0;
-z-index:100;
-/* Unnecessary */
+.Example .modal{
+background:#fff;
+border:1px dashed #aaa;
+border-radius:4px;
 width:600px; 
 padding:24px 0
 }
-/* Unnecessary */
-.modal-title{
+.Example .modal-title{
 display:table;
 line-height:26px;
 margin:auto;
 padding:0 13px;
-background:#222;
+background:#eee;
 font-size:15px;
-color:#fff;
+color:#171717;
 -webkit-user-select:none;
 -khtml-user-select:none;
 -moz-user-select:none;
 -ms-user-select:none;
 -o-user-select:none
 }
-.modal-body{
+.Example .modal-body{
 width:80%;
 padding:30px;
 margin:154px auto 130px;
-background:rgba(255,255,255,0.05);
+background:rgba(0,0,0,0.05);
 border-radius:3px;
+color:#171717;
+text-align:center
 }

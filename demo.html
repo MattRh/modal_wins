@@ -11,23 +11,39 @@
 
 <button onclick='modal.show("firstModal")'>Show first</button>
 
-<div id=firstModal class='modal Example'>
+<div class=modal id=firstModal>
 	<div class=modal-title>First modal</div>
 	<div class=modal-body>
-		<button onclick='modal.switchTo("secondModal")'>Go to second</button>
+		<button onclick='modal.show("secondModal", true)'>Go to second</button>
+		<button onclick='modal.show("subModal")'>Show subwindow</button>
 	</div>
 </div>
-<div id=secondModal class='modal Example'>
+<div class=modal id=secondModal>
 	<div class=modal-title>Second window</div>
 	<div class=modal-body>
 		<button onclick='modal.hide()'>Close modal</button>
-		<button onclick='modal.switchTo("firstModal")'>Go to first</button>
+		<button onclick='modal.show("firstModal", true)'>Go to first</button>
+	</div>
+</div>
+<div class=modal id=subModal>
+	<div class=modal-title>Subwindow</div>
+	<div class=modal-body>
+		<button onclick='modal.show("subModal2")'>Open another one</button>
+		<button onclick='modal.show("subModal2", true)'>Switch to another one</button>
+	</div>
+</div>
+<div class=modal id=subModal2>
+	<div class=modal-title>Subwindow 2</div>
+	<div class=modal-body>
+		Press "ESC" to close
 	</div>
 </div>
 
-<div id=modal-box style='display:none; opacity:0'>
-	<div id=modal-backdrop onclick='modal.hide()'></div>
-	<table id=modal-wrapper><tr><td></td></tr></table>
+<div class='modal-box Example'>
+	<div class=modal-backdrop onclick='modal.hide()'></div>
+	<table class=modal-wrapper>
+		<tbody><tr><td></td></tr></tbody>
+	</table>
 </div>
 
 <body>

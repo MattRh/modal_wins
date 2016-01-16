@@ -1,0 +1,13 @@
+v1.3
+ + Now with subwindows (they have same structure as main box)
+ + "ESC" now also closes last window (adjusting in config)
+ + Changed almost all selectors
+ + Function modal.switchTo("id") changed to modal.show("id", true)
+ + Functions modalShow, modalHide, switchTo now with prefix "__"
+ + Little fix of animation
+v1.2
+ + Now without JQuery
+ + Animations on pure JS and CSS
+ + Now absolutely independent script (all in one, without third-party functions)
+ + Initialization on window load
+ + Addded demo
