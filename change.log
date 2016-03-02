@@ -1,3 +1,8 @@
+v1.4.0
+ + Now uses flex-box instead of table for aligning
+ + Fixed bug with scrolling
+ + Fixed error with closing by key
+ + Added compressed version
 v1.3.1
  + Added modal opening by hash in url (adjusting in config)
 v1.3

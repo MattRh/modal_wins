@@ -1,6 +1,6 @@
 /**
- * ModalWindows v1.3 ( https://github.com/MattRh/modal_wins )
- * MattRh, 2015-2016
+ * ModalWindows v1.4.0 ( https://github.com/MattRh/modal_wins )
+ * MalSerAl, 2015-2016
  * 
  * modal.show("modal_id") - openes modal with id=modal_id in new box
  * modal.show("modal_id", true) - switches to modal with id=modal_id in current box
@@ -10,12 +10,13 @@
 var modal = {
 	config: {
 		// CSS rules
-		modalBox: '.modal-box', 
-		modalsClass: '.modal',
-		modalsCont: '.modal-wrapper > tbody > tr > td',
+		modalBox: '.modal-box', // Container for all modal stuff
+		modalsClass: '.modal', // Class assigned to each modal window box
+		modalsCont: '.modal-wrapper', // Place, where modals will be put after collecting
 		// Key code. Null to disable
 		hideByKey: 27,
 		// URL hash prefix for modal anchor. Null to disable
+		// Example: site.com/url.html#someModal will open modal with id "someModal" after init of the script.
 		urlPrefix: ''
 	},
 	tStamps: [],
@@ -91,6 +92,9 @@ var modal = {
 		}, 170);
 		
 		this.nestingLVL--;
+		
+		if(this.config.hideByKey !== null && modal.nestingLVL == 0)
+			window.removeEventListener('keyup', modal.__keyPress);
 		//console.timeEnd('########hide_time');
 	},
 	__modalShow: function(e, s) { // element, switch or not
@@ -148,12 +152,8 @@ var modal = {
 	__keyPress: function(e) { // event
 		e.preventDefault();
 		
-		if(e.keyCode == modal.config.hideByKey) {
-			if(this.nestingLVL == 1)
-				window.removeEventListener('keyup', modal.__keyPress);
-			
+		if(e.keyCode == modal.config.hideByKey)
 			modal.hide();
-		}
 	},
 	__scrollSet: function() {
 		var div, heightData;
@@ -186,7 +186,7 @@ var modal = {
 		else if(document.body) // other Explorers
 			windowHeight = document.body.clientHeight;
 
-		return [windowHeight, yScroll];
+		return [windowHeight, yScroll]; // [height content window, all content height]
 	},
 	__insertAfter: function(e, p) {
 		return p.parentNode.insertBefore(e, p.nextSibling);
