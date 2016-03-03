@@ -1,3 +1,8 @@
+v1.4.1
+ + Small improvements
+ + Added initialization check
+ + Added 'onopen(window DOMelement)' and 'onclose(window DOMelement)' events
+ + Improved animation. Now animation sets via CSS styles
 v1.4.0
  + Now uses flex-box instead of table for aligning
  + Fixed bug with scrolling

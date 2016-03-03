@@ -1,5 +1,5 @@
 /**
- * ModalWindows v1.4.0 ( https://github.com/MattRh/modal_wins )
+ * ModalWindows v1.4.1 ( https://github.com/MattRh/modal_wins )
  * MalSerAl, 2015-2016
  * 
  * modal.show("modal_id") - openes modal with id=modal_id in new box
@@ -9,10 +9,23 @@
 
 var modal = {
 	config: {
+		isInited: false,
 		// CSS rules
 		modalBox: '.modal-box', // Container for all modal stuff
 		modalsClass: '.modal', // Class assigned to each modal window box
 		modalsCont: '.modal-wrapper', // Place, where modals will be put after collecting
+		// Animation classes
+		show: { // Showing classes
+			stat: 'opened', // static
+			dyn: 'show', // dynamic
+			swch: 'switch', // switch to
+		},
+		hide: { // Hiding classes
+			stat: 'closed', // static
+			dyn: 'hide' // dynamic
+		},
+		// Class added when modals has been collected
+		loadCls: 'loaded',
 		// Key code. Null to disable
 		hideByKey: 27,
 		// URL hash prefix for modal anchor. Null to disable
@@ -21,25 +34,30 @@ var modal = {
 	},
 	tStamps: [],
 	init: function() {
+		if(this.isInited)
+			return false;
+		this.isInited = true;
+		
+		this.modalBoxes = [];
+		this.modalBoxes[1] = document.querySelector(this.config.modalBox);
+		this.__addClass(this.modalBoxes[1], this.config.hide.stat);
+		this.__addClass(this.modalBoxes[1], this.config.loadCls);
+		this.boxTemplate = this.modalBoxes[1].cloneNode(true);
+		
 		this.modalRegExp = new RegExp('(\\s|^)' + this.config.modalsClass.substr(1) + '(\\s|$)');
 		this.bodyStyle = document.body.style;
-		this.modalBoxes = [];
 		this.openedModal = [];
 		this.nestingLVL = 0;
-		
-		this.modalBoxes[1] = document.querySelector(this.config.modalBox);
-		this.modalBoxes[1].style.cssText = 'display:none; opacity:0';
-		this.boxTemplate = this.modalBoxes[1].cloneNode(true);
 		
 		this.__modalsCollect();
 		this.__scrollSet();
 		this.__anchorOpen();
 	},
-	show: function(e, s) { // element, switch
+	show: function(id, s) { // element id, switch
 		//console.time('show_time');
 		var mainStyle, bodyStyle, el, lvl;
 		
-		el = document.getElementById(e);
+		el = document.getElementById(id);
 		if(el === null || !el.className.match(this.modalRegExp) || !!~this.openedModal.indexOf(el))
 			return false;
 		
@@ -57,103 +75,127 @@ var modal = {
 			this.modalBoxes[lvl].querySelector(this.config.modalsCont).appendChild(el);
 		}
 		
-		mainStyle = this.modalBoxes[lvl].style;
 		bodyStyle = this.bodyStyle;
-
 		bodyStyle.overflowY = 'hidden';
 		bodyStyle.paddingRight = this.scrollBar;
-		mainStyle.display = 'block';
-		mainStyle.opacity = 0;
 
-		this.__animate(mainStyle, {'opacity': 1}, 200, 'main');
+		this.__animate(this.modalBoxes[lvl], 'show');
 		this.__modalShow(el);
 		
 		if(this.config.hideByKey !== null)
 			window.addEventListener('keyup', modal.__keyPress);
+		
+		if(typeof(this.onopen) == 'function')
+			this.onopen(el);
 		//console.timeEnd('show_time');
 	},
 	hide: function() {
 		//console.time('########hide_time');
-		var mainStyle, bodyStyle, lvl;
 		
-		lvl = this.nestingLVL;
-		mainStyle = this.modalBoxes[lvl].style;
-		bodyStyle = this.bodyStyle;
-
-		this.__animate(mainStyle, {'opacity': 0}, 180, 'main');
-		this.__modalHide();
+		var lvl = this.nestingLVL;
+		if(lvl == 0)
+			return false;
 		
-		setTimeout(function() {
-			mainStyle.display = 'none';
-			bodyStyle.overflowY = bodyStyle.paddingRight = null;
+		var el = this.modalBoxes[lvl];
+		this.__animate(this.modalBoxes[lvl], 'hide', function() {
+			modal.bodyStyle.overflowY = modal.bodyStyle.paddingRight = null;
 			
 			if(lvl > 1)
-				modal.modalBoxes[lvl].parentNode.removeChild(modal.modalBoxes[lvl]);
-		}, 170);
+				el.parentNode.removeChild(el);
+		});
+		
+		this.__modalHide();
 		
 		this.nestingLVL--;
 		
 		if(this.config.hideByKey !== null && modal.nestingLVL == 0)
 			window.removeEventListener('keyup', modal.__keyPress);
+		
+		if(typeof(this.onclose) == 'function')
+			this.onclose(el);
 		//console.timeEnd('########hide_time');
 	},
 	__modalShow: function(e, s) { // element, switch or not
-		var elStyle;
-		
 		if(this.nestingLVL > 1)
 			this.modalBoxes[this.nestingLVL].querySelector(this.config.modalsCont).appendChild(e);
 		
 		this.openedModal[this.nestingLVL] = e;
-		elStyle = e.style;
-		
-		if(!s) {
-			elStyle.cssText = 'display:block;opacity:1;top:-50px';
-			this.__animate(elStyle, {'top': 0}, 220, 'win');
-		} else {
-			elStyle.cssText = 'display:block;opacity:0;top:50px';
-			this.__animate(elStyle, {'top': 0, 'opacity': 1}, 220, 'win');
-		}
+		this.__animate(e, 'show' + (s ? '_switch' : ''));
 	},
-	__modalHide: function() {
-		var lvl, modalWin, modalWinSt;
+	__modalHide: function(cb) { // callback
+		var lvl = this.nestingLVL;
+		var modalWin = this.openedModal[lvl];
 		
-		lvl = this.nestingLVL;
-		modalWin = this.openedModal[lvl];
-		modalWinSt = modalWin.style;
-
-		this.__animate(modalWinSt, {'top': '-50px', 'opacity': 0}, 190, 'win');
-		setTimeout(function(){
-			modalWinSt.display = 'none';
-			modal.modalBoxes[1].querySelector(modal.config.modalsCont).appendChild(modalWin);
-		}, 190);
+		this.__animate(modalWin, 'hide', function() {
+			if(lvl > 1)
+				modal.modalBoxes[1].querySelector(modal.config.modalsCont).appendChild(modalWin);
+			if(typeof(cb) == 'function') cb();
+		});
 		this.openedModal[lvl] = null;
 	},
 	__switchTo: function(e) { // element
-		this.__modalHide();
-		setTimeout(function(){modal.__modalShow(e, true);}, 200);
+		this.__modalHide(function(){modal.__modalShow(e, true)});
 	},
-	__animate: function(s, o, t, id) { // element's style var, object with changing styles, time, operation id
-		var list = '', stamp = new Date().getTime();
+	__animate: function(el, t, cb) { // element, type of animation, callback
+		var animEndEvent, act, swch, add, rem;
 		
-		for(var i in o) list += i + ' ' + t + 'ms ease,';
-		list = list.slice(0, -1);
+		if(window.onanimationend === null)
+			animEndEvent = 'animationend';
+		else
+			animEndEvent = 'webkitAnimationEnd';
+		
+		t = t.split('_');
+		act = t[0];
+		swch = t[1] ? true : false;
+		
+		if(act == 'show') {
+			add = this.config.show;
+			rem = this.config.hide;
+		} else if(act == 'hide') {
+			add = this.config.hide;
+			rem = this.config.show;
+		} else {
+			return false;
+		}
+		
+		this.__addClass(el, swch ? add.swch : add.dyn);
+		this.__removeClass(el, rem.dyn);
+		this.__removeClass(el, rem.stat);
+		
+		el.addEventListener(animEndEvent, function modalshowev() {
+			modal.__removeClass(el, swch ? add.swch : add.dyn);
+			modal.__addClass(el, add.stat);
+			
+			if(typeof(cb) == 'function')
+				cb();
+			el.removeEventListener(animEndEvent, modalshowev);
+		});
+	},
+	__modalsCollect: function() {
+		var cont, modals, i, len;
+		
+		cont = this.modalBoxes[1].querySelector(this.config.modalsCont);
+		modals = document.querySelectorAll(this.config.modalsClass);
 
-		s.transition = s.webkitTransition = list;
-		id += '_' + this.nestingLVL;
-		modal.tStamps[id] = stamp;
-		setTimeout(function() {
-			for(var i in o) s[i] = o[i];
-		}, 15);
-		setTimeout(function() {
-			if(modal.tStamps[id] == stamp)
-				s.transition = s.webkitTransition = null;
-		}, t);
+		for(i = 0, len = modals.length; i < len; i++) {
+			if(modals[i].parentNode == cont)
+				continue;
+
+			cont.appendChild(modals[i]);
+			this.__addClass(modals[i], this.config.hide.stat);
+		}
 	},
-	__keyPress: function(e) { // event
-		e.preventDefault();
+	__anchorOpen: function() {
+		var anc;
 		
-		if(e.keyCode == modal.config.hideByKey)
-			modal.hide();
+		if(this.config.urlPrefix !== null) {
+			anc = window.location.hash.replace('#', '');
+			if(anc != '' && anc.substr(0, this.config.urlPrefix.length) == this.config.urlPrefix) {
+				el = document.getElementById(anc);
+				if(el != null && el.className.match(this.modalRegExp))
+					modal.show(anc);
+			}
+		}
 	},
 	__scrollSet: function() {
 		var div, heightData;
@@ -166,6 +208,12 @@ var modal = {
 		this.scrollBar = heightData[0] < heightData[1] ? div.offsetWidth - div.clientWidth + 'px' : 0;
 
 		document.body.removeChild(div);
+	},
+	__keyPress: function(e) { // event
+		e.preventDefault();
+		
+		if(e.keyCode == modal.config.hideByKey)
+			modal.hide();
 	},
 	__getHeight: function() {
 		var yScroll, windowHeight;
@@ -189,33 +237,16 @@ var modal = {
 		return [windowHeight, yScroll]; // [height content window, all content height]
 	},
 	__insertAfter: function(e, p) {
-		return p.parentNode.insertBefore(e, p.nextSibling);
+		p.parentNode.insertBefore(e, p.nextSibling);
 	},
-	__modalsCollect: function() {
-		var cont, modals, i, len;
-		
-		cont = this.modalBoxes[1].querySelector(this.config.modalsCont);
-		modals = document.querySelectorAll(this.config.modalsClass);
-
-		for(i = 0, len = modals.length; i < len; i++) {
-			if(modals[i].parentNode == cont)
-				continue;
-
-			cont.appendChild(modals[i]);
-			modals[i].style.display = 'none';
-		}
+	__addClass: function(e, c) {
+		var re = new RegExp('(^|\\s)' + c + '(\\s|$)', 'g');
+		if(!re.test(e.className))
+			e.className = (e.className + ' ' + c).replace(/\s+/g, ' ').replace(/(^ | $)/g, '');
 	},
-	__anchorOpen: function() {
-		var anc;
-		
-		if(this.config.urlPrefix !== null) {
-			anc = window.location.hash.replace('#', '');
-			if(anc != '' && anc.substr(0, this.config.urlPrefix.length) == this.config.urlPrefix) {
-				el = document.getElementById(anc);
-				if(el != null && el.className.match(this.modalRegExp))
-					modal.show(anc);
-			}
-		}
+	__removeClass: function(e, c) {
+		var re = new RegExp('(^|\\s)' + c + '(\\s|$)', 'g');
+		e.className = e.className.replace(re, '$1').replace(/\s+/g, ' ').replace(/(^ | $)/g, '');
 	}
 };
-window.onload = function(){modal.init();};
+window.addEventListener('DOMContentLoaded', function(){modal.init()});

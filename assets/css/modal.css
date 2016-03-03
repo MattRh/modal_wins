@@ -2,6 +2,7 @@
 .modal-box{
 position:fixed;
 overflow:auto;
+display:none;
 top:0;
 left:0;
 width:100%;
@@ -31,7 +32,80 @@ border-spacing:0
 }
 .modal{
 position:relative;
-opacity:0
+display:none
+}
+.modal-box.loaded{
+display:block
+}
+.modal-box .modal{
+display:block
+}
+
+/* Animations */
+.modal-box.opened{
+}
+.modal-box.show{
+-webkit-animation:modal-box-show .2s ease;
+-moz-animation:modal-box-show .2s ease;
+-ms-animation:modal-box-show .2s ease;
+-o-animation:modal-box-show .2s ease;
+animation:modal-box-show .2s ease
+}
+.modal-box.closed{
+display:none
+}
+.modal-box.hide{
+-webkit-animation:modal-box-hide .18s ease;
+-moz-animation:modal-box-hide .18s ease;
+-ms-animation:modal-box-hide .18s ease;
+-o-animation:modal-box-hide .18s ease;
+animation:modal-box-hide .18s ease;
+}
+.modal-box .modal.opened{
+}
+.modal-box .modal.show{
+-webkit-animation:modal-win-show .22s ease;
+-moz-animation:modal-win-show .22s ease;
+-ms-animation:modal-win-show .22s ease;
+-o-animation:modal-win-show .22s ease;
+animation:modal-win-show .22s ease
+}
+.modal-box .modal.switch{
+-webkit-animation:modal-win-switch .22s ease;
+-moz-animation:modal-win-switch .22s ease;
+-ms-animation:modal-win-switch .22s ease;
+-o-animation:modal-win-switch .22s ease;
+animation:modal-win-switch .22s ease
+}
+.modal-box .modal.closed{
+display:none
+}
+.modal-box .modal.hide{
+-webkit-animation:modal-win-hide .18s ease;
+-moz-animation:modal-win-hide .18s ease;
+-ms-animation:modal-win-hide .18s ease;
+-o-animation:modal-win-hide .18s ease;
+animation:modal-win-hide .18s ease
+}
+@keyframes modal-box-show{
+	from {opacity:0}
+	to {opacity:1}
+}
+@keyframes modal-box-hide{
+	from {opacity:1}
+	to {opacity:0}
+}
+@keyframes modal-win-show{
+	from {top:-50px;opacity:0}
+	to {top:0;opacity:1}
+}
+@keyframes modal-win-switch{
+	from {top:50px;opacity:0}
+	to {top:0;opacity:1}
+}
+@keyframes modal-win-hide{
+	from {top:0;opacity:1}
+	to {top:-60px;opacity:0}
 }
 
 /* Example styles */
@@ -46,22 +120,23 @@ padding:0
 button{
 display:block;
 padding:3px;
-margin:5px auto;
+margin:5px auto
 }
-.Example.modal-box{
+.modal-box.example{
 background-color:rgba(0,0,0,0.175)
 }
-.Example .modal-wrapper{
+.modal-box.example .modal-cont{
 padding:15px 0;
+box-sizing:border-box
 }
-.Example .modal{
+.modal-box.example .modal{
 background:#fff;
 border:1px dashed #aaa;
 border-radius:4px;
 width:600px; 
 padding:24px 0
 }
-.Example .modal-title{
+.modal-box.example .modal-title{
 display:table;
 line-height:26px;
 margin:auto;
@@ -75,7 +150,7 @@ color:#171717;
 -ms-user-select:none;
 -o-user-select:none
 }
-.Example .modal-body{
+.modal-box.example .modal-body{
 width:80%;
 padding:30px;
 margin:154px auto 130px;
