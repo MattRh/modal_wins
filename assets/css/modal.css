@@ -26,7 +26,6 @@ height:100%
 }
 .modal-wrapper{
 position:relative;
-height:100%;
 margin:0 auto;
 border-spacing:0
 }
@@ -104,6 +103,26 @@ animation:modal-win-hide .18s ease
 	to {top:0;opacity:1}
 }
 @keyframes modal-win-hide{
+	from {top:0;opacity:1}
+	to {top:-60px;opacity:0}
+}
+@-webkit-keyframes modal-box-show{
+	from {opacity:0}
+	to {opacity:1}
+}
+@-webkit-keyframes modal-box-hide{
+	from {opacity:1}
+	to {opacity:0}
+}
+@-webkit-keyframes modal-win-show{
+	from {top:-50px;opacity:0}
+	to {top:0;opacity:1}
+}
+@-webkit-keyframes modal-win-switch{
+	from {top:50px;opacity:0}
+	to {top:0;opacity:1}
+}
+@-webkit-keyframes modal-win-hide{
 	from {top:0;opacity:1}
 	to {top:-60px;opacity:0}
 }

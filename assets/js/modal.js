@@ -1,5 +1,5 @@
 /**
- * ModalWindows v1.4.1 ( https://github.com/MattRh/modal_wins )
+ * ModalWindows v1.5.0-beta ( https://github.com/MattRh/modal_wins )
  * MalSerAl, 2015-2016
  * 
  * modal.show("modal_id") - openes modal with id=modal_id in new box
@@ -34,165 +34,168 @@ var modal = {
 	},
 	tStamps: [],
 	init: function() {
-		if(this.isInited)
+		if(modal.isInited)
 			return false;
-		this.isInited = true;
+		modal.isInited = true;
 		
-		this.modalBoxes = [];
-		this.modalBoxes[1] = document.querySelector(this.config.modalBox);
-		this.__addClass(this.modalBoxes[1], this.config.hide.stat);
-		this.__addClass(this.modalBoxes[1], this.config.loadCls);
-		this.boxTemplate = this.modalBoxes[1].cloneNode(true);
+		// TODO: делать кроссплатформенные анимации (key-frames) и определять разные ивенты окончания анимации
+		modal.__setAnimatonEndEvent();
 		
-		this.modalRegExp = new RegExp('(\\s|^)' + this.config.modalsClass.substr(1) + '(\\s|$)');
-		this.bodyStyle = document.body.style;
-		this.openedModal = [];
-		this.nestingLVL = 0;
+		modal.modalBoxes = [];
+		modal.modalBoxes[1] = document.querySelector(modal.config.modalBox);
+		modal.__addClass(modal.modalBoxes[1], modal.config.hide.stat);
+		modal.__addClass(modal.modalBoxes[1], modal.config.loadCls);
+		modal.boxTemplate = modal.modalBoxes[1].cloneNode(true);
 		
-		this.__modalsCollect();
-		this.__scrollSet();
-		this.__anchorOpen();
+		modal.modalRegExp = new RegExp('(\\s|^)' + modal.config.modalsClass.substr(1) + '(\\s|$)');
+		modal.bodyStyle = document.body.style;
+		modal.openedModal = [];
+		modal.nestingLVL = 0;
+		
+		modal.__modalsCollect();
+		modal.__scrollSet();
+		modal.__anchorOpen();
 	},
 	show: function(id, s) { // element id, switch
 		//console.time('show_time');
 		var mainStyle, bodyStyle, el, lvl;
+		modal.init();
 		
 		el = document.getElementById(id);
-		if(el === null || !el.className.match(this.modalRegExp) || !!~this.openedModal.indexOf(el))
+		
+		if(el === null || !el.className.match(modal.modalRegExp) || !!~modal.openedModal.indexOf(el))
 			return false;
 		
 		if(s) {
-			this.__switchTo(el);
+			modal.__switchTo(el);
 			return false;
 		}
 		
-		lvl = ++this.nestingLVL;
+		lvl = ++modal.nestingLVL;
 		
-		if(this.nestingLVL > 1) {
-			this.modalBoxes[lvl] = this.boxTemplate.cloneNode(true);
-			this.__insertAfter(this.modalBoxes[lvl], this.modalBoxes[lvl - 1]);
+		if(modal.nestingLVL > 1) {
+			modal.modalBoxes[lvl] = modal.boxTemplate.cloneNode(true);
+			modal.__insertAfter(modal.modalBoxes[lvl], modal.modalBoxes[lvl - 1]);
 			
-			this.modalBoxes[lvl].querySelector(this.config.modalsCont).appendChild(el);
+			modal.modalBoxes[lvl].querySelector(modal.config.modalsCont).appendChild(el);
 		}
 		
-		bodyStyle = this.bodyStyle;
+		bodyStyle = modal.bodyStyle;
 		bodyStyle.overflowY = 'hidden';
-		bodyStyle.paddingRight = this.scrollBar;
+		bodyStyle.paddingRight = modal.scrollBar;
 
-		this.__animate(this.modalBoxes[lvl], 'show');
-		this.__modalShow(el);
+		modal.__animate(modal.modalBoxes[lvl], 'show');
+		modal.__modalShow(el);
 		
-		if(this.config.hideByKey !== null)
+		if(modal.config.hideByKey !== null)
 			window.addEventListener('keyup', modal.__keyPress);
 		
-		if(typeof(this.onopen) == 'function')
-			this.onopen(el);
+		if(typeof(modal.onopen) == 'function')
+			modal.onopen(el);
 		//console.timeEnd('show_time');
 	},
 	hide: function() {
 		//console.time('########hide_time');
 		
-		var lvl = this.nestingLVL;
+		var lvl = modal.nestingLVL;
 		if(lvl == 0)
 			return false;
 		
-		var el = this.modalBoxes[lvl];
-		this.__animate(this.modalBoxes[lvl], 'hide', function() {
-			modal.bodyStyle.overflowY = modal.bodyStyle.paddingRight = null;
-			
+		var el = modal.modalBoxes[lvl];
+		modal.__animate(modal.modalBoxes[lvl], 'hide', function() {
 			if(lvl > 1)
 				el.parentNode.removeChild(el);
+			else
+				modal.bodyStyle.overflowY = modal.bodyStyle.paddingRight = null;
 		});
 		
-		this.__modalHide();
+		modal.__modalHide();
 		
-		this.nestingLVL--;
+		modal.nestingLVL--;
 		
-		if(this.config.hideByKey !== null && modal.nestingLVL == 0)
+		if(modal.config.hideByKey !== null && modal.nestingLVL == 0)
 			window.removeEventListener('keyup', modal.__keyPress);
 		
-		if(typeof(this.onclose) == 'function')
-			this.onclose(el);
+		if(typeof(modal.onclose) == 'function')
+			modal.onclose(el);
 		//console.timeEnd('########hide_time');
 	},
 	__modalShow: function(e, s) { // element, switch or not
-		if(this.nestingLVL > 1)
-			this.modalBoxes[this.nestingLVL].querySelector(this.config.modalsCont).appendChild(e);
+		if(modal.nestingLVL > 1)
+			modal.modalBoxes[modal.nestingLVL].querySelector(modal.config.modalsCont).appendChild(e);
 		
-		this.openedModal[this.nestingLVL] = e;
-		this.__animate(e, 'show' + (s ? '_switch' : ''));
+		modal.openedModal[modal.nestingLVL] = e;
+		modal.__animate(e, 'show' + (s ? '_switch' : ''));
 	},
 	__modalHide: function(cb) { // callback
-		var lvl = this.nestingLVL;
-		var modalWin = this.openedModal[lvl];
+		var lvl = modal.nestingLVL;
+		var modalWin = modal.openedModal[lvl];
 		
-		this.__animate(modalWin, 'hide', function() {
+		modal.__animate(modalWin, 'hide', function() {
 			if(lvl > 1)
 				modal.modalBoxes[1].querySelector(modal.config.modalsCont).appendChild(modalWin);
 			if(typeof(cb) == 'function') cb();
 		});
-		this.openedModal[lvl] = null;
+		modal.openedModal[lvl] = null;
 	},
 	__switchTo: function(e) { // element
-		this.__modalHide(function(){modal.__modalShow(e, true)});
+		modal.__modalHide(function(){modal.__modalShow(e, true)});
 	},
+	// TODO: if(!modal.animEndEvent) { count animation timeout to prevent bugs }
 	__animate: function(el, t, cb) { // element, type of animation, callback
-		var animEndEvent, act, swch, add, rem;
-		
-		if(window.onanimationend === null)
-			animEndEvent = 'animationend';
-		else
-			animEndEvent = 'webkitAnimationEnd';
+		var act, swch, add, rem;
 		
 		t = t.split('_');
 		act = t[0];
 		swch = t[1] ? true : false;
 		
 		if(act == 'show') {
-			add = this.config.show;
-			rem = this.config.hide;
+			add = modal.config.show;
+			rem = modal.config.hide;
 		} else if(act == 'hide') {
-			add = this.config.hide;
-			rem = this.config.show;
+			add = modal.config.hide;
+			rem = modal.config.show;
 		} else {
 			return false;
 		}
 		
-		this.__addClass(el, swch ? add.swch : add.dyn);
-		this.__removeClass(el, rem.dyn);
-		this.__removeClass(el, rem.stat);
+		modal.__addClass(el, swch ? add.swch : add.dyn);
+		modal.__removeClass(el, rem.dyn);
+		modal.__removeClass(el, rem.stat);
 		
-		el.addEventListener(animEndEvent, function modalshowev() {
+		
+		el.addEventListener(modal.animEndEvent, function modalanimev() {
+			el.removeEventListener(modal.animEndEvent, modalanimev);
+			
 			modal.__removeClass(el, swch ? add.swch : add.dyn);
 			modal.__addClass(el, add.stat);
 			
 			if(typeof(cb) == 'function')
 				cb();
-			el.removeEventListener(animEndEvent, modalshowev);
 		});
 	},
 	__modalsCollect: function() {
 		var cont, modals, i, len;
 		
-		cont = this.modalBoxes[1].querySelector(this.config.modalsCont);
-		modals = document.querySelectorAll(this.config.modalsClass);
+		cont = modal.modalBoxes[1].querySelector(modal.config.modalsCont);
+		modals = document.querySelectorAll(modal.config.modalsClass);
 
 		for(i = 0, len = modals.length; i < len; i++) {
 			if(modals[i].parentNode == cont)
 				continue;
 
 			cont.appendChild(modals[i]);
-			this.__addClass(modals[i], this.config.hide.stat);
+			modal.__addClass(modals[i], modal.config.hide.stat);
 		}
 	},
 	__anchorOpen: function() {
 		var anc;
 		
-		if(this.config.urlPrefix !== null) {
+		if(modal.config.urlPrefix !== null) {
 			anc = window.location.hash.replace('#', '');
-			if(anc != '' && anc.substr(0, this.config.urlPrefix.length) == this.config.urlPrefix) {
+			if(anc != '' && anc.substr(0, modal.config.urlPrefix.length) == modal.config.urlPrefix) {
 				el = document.getElementById(anc);
-				if(el != null && el.className.match(this.modalRegExp))
+				if(el != null && el.className.match(modal.modalRegExp))
 					modal.show(anc);
 			}
 		}
@@ -204,8 +207,8 @@ var modal = {
 		div.style.cssText = 'visibility:hidden;width:100px;height:100px;overflow-y:scroll';
 		document.body.appendChild(div);
 
-		heightData = this.__getHeight();
-		this.scrollBar = heightData[0] < heightData[1] ? div.offsetWidth - div.clientWidth + 'px' : 0;
+		heightData = modal.__getHeight();
+		modal.scrollBar = heightData[0] < heightData[1] ? div.offsetWidth - div.clientWidth + 'px' : 0;
 
 		document.body.removeChild(div);
 	},
@@ -236,6 +239,55 @@ var modal = {
 
 		return [windowHeight, yScroll]; // [height content window, all content height]
 	},
+	__setAnimatonEndEvent: function() {
+		var i, l, styles, events, prefixes, hash, block, styleSheet;
+		modal.animEndEvent = false;
+		
+		// Settings
+		events = ['animationend', 'webkitAnimationEnd', 'oAnimationEnd', 'MSAnimationEnd'];
+		prefixes = ['-webkit-', '-moz-', '-ms-', '-o-', ''];
+		hash = modal.__genStr(12);
+		
+		// Generating testing styles
+		styles = '#' + hash + '{';
+		for(i = 0, l = prefixes.length; i < l; i++)
+			styles += prefixes[i] + 'animation:' + hash + '-anim 1ms;';
+		styles += '}';
+		for(i = 0, l = prefixes.length; i < l; i++)
+			styles += '@' + prefixes[i] + 'keyframes ' + hash + '-anim{from {left:0} to {left:1px}}';
+		
+		// Style sheet
+		styleSheet = document.createElement('style');
+		styleSheet.innerHTML = styles;
+		document.head.appendChild(styleSheet);
+		
+		// Testing block
+		block = document.createElement('div');
+		block.id = hash;
+		block.style.cssText = 'position:absolute;visibility:hidden;opacity:0;width:1px;height:1px';
+		document.body.appendChild(block);
+		
+		// Capture event
+		for(i = 0, l = events.length; i < l; i++)
+			block.addEventListener(events[i], function(ev) {
+				if(!modal.animEndEvent) {
+					//console.log(ev.type);
+					modal.animEndEvent = ev.type;
+					document.head.removeChild(styleSheet);
+					document.body.removeChild(block);
+				}
+			});
+	},
+	__genStr: function(len) {
+		var i,
+			text = '',
+			possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
+		for(i = 0; i < len; i++)
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+		return text;
+	},
 	__insertAfter: function(e, p) {
 		p.parentNode.insertBefore(e, p.nextSibling);
 	},
@@ -247,6 +299,7 @@ var modal = {
 	__removeClass: function(e, c) {
 		var re = new RegExp('(^|\\s)' + c + '(\\s|$)', 'g');
 		e.className = e.className.replace(re, '$1').replace(/\s+/g, ' ').replace(/(^ | $)/g, '');
-	}
+	},
+	
 };
 window.addEventListener('DOMContentLoaded', function(){modal.init()});
