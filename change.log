@@ -1,5 +1,7 @@
 v1.5
- + Now it choose enimationEnd event corectly
+ + Fixed some bugs
+ + Added triggers 'open', 'close' to each modal and common box
+ + Now it chooses enimationEnd event correctly
 v1.4.1
  + Small improvements
  + Added initialization check
@@ -11,7 +13,7 @@ v1.4.0
  + Fixed error with closing by key
  + Added compressed version
 v1.3.1
- + Added modal opening by hash in url (adjusting in config)
+ + Added modal opening by hash in URL (adjusting in config)
 v1.3
  + Now with subwindows (they have same structure as main box)
  + "ESC" now also closes last window (adjusting in config)
@@ -24,4 +26,4 @@ v1.2
  + Animations on pure JS and CSS
  + Now absolutely independent script (all in one, without third-party functions)
  + Initialization on window load
- + Addded demo
+ + Added demo

@@ -1,5 +1,5 @@
 /**
- * ModalWindows v1.5.0-beta ( https://github.com/MattRh/modal_wins )
+ * ModalWindows v1.5.0 ( https://github.com/MattRh/modal_wins )
  * MalSerAl, 2015-2016
  * 
  * modal.show("modal_id") - openes modal with id=modal_id in new box
@@ -29,16 +29,18 @@ var modal = {
 		// Key code. Null to disable
 		hideByKey: 27,
 		// URL hash prefix for modal anchor. Null to disable
-		// Example: site.com/url.html#someModal will open modal with id "someModal" after init of the script.
+		// Example: 
+		// urlPrefix: 'M_'
+		// site.com/page.html#M_someModal will open modal with id "someModal" after init of the script.
 		urlPrefix: ''
 	},
 	tStamps: [],
+
 	init: function() {
 		if(modal.isInited)
 			return false;
 		modal.isInited = true;
 		
-		// TODO: делать кроссплатформенные анимации (key-frames) и определять разные ивенты окончания анимации
 		modal.__setAnimatonEndEvent();
 		
 		modal.modalBoxes = [];
@@ -56,6 +58,7 @@ var modal = {
 		modal.__scrollSet();
 		modal.__anchorOpen();
 	},
+
 	show: function(id, s) { // element id, switch
 		//console.time('show_time');
 		var mainStyle, bodyStyle, el, lvl;
@@ -90,10 +93,12 @@ var modal = {
 		if(modal.config.hideByKey !== null)
 			window.addEventListener('keyup', modal.__keyPress);
 		
-		if(typeof(modal.onopen) == 'function')
-			modal.onopen(el);
+		if(typeof(modal.onopen) == 'function') modal.onopen(el);
+		modal.__triggerEvent(modal.modalBoxes[lvl], 'open');
+
 		//console.timeEnd('show_time');
 	},
+
 	hide: function() {
 		//console.time('########hide_time');
 		
@@ -116,17 +121,22 @@ var modal = {
 		if(modal.config.hideByKey !== null && modal.nestingLVL == 0)
 			window.removeEventListener('keyup', modal.__keyPress);
 		
-		if(typeof(modal.onclose) == 'function')
-			modal.onclose(el);
+		if(typeof(modal.onclose) == 'function') modal.onclose(el);
+		modal.__triggerEvent(modal.modalBoxes[lvl], 'close');
+
 		//console.timeEnd('########hide_time');
 	},
+
 	__modalShow: function(e, s) { // element, switch or not
 		if(modal.nestingLVL > 1)
 			modal.modalBoxes[modal.nestingLVL].querySelector(modal.config.modalsCont).appendChild(e);
 		
 		modal.openedModal[modal.nestingLVL] = e;
-		modal.__animate(e, 'show' + (s ? '_switch' : ''));
+		modal.__animate(e, 'show' + (s ? '_switch' : ''), function() {
+			modal.__triggerEvent(e, 'open');
+		});
 	},
+
 	__modalHide: function(cb) { // callback
 		var lvl = modal.nestingLVL;
 		var modalWin = modal.openedModal[lvl];
@@ -134,13 +144,20 @@ var modal = {
 		modal.__animate(modalWin, 'hide', function() {
 			if(lvl > 1)
 				modal.modalBoxes[1].querySelector(modal.config.modalsCont).appendChild(modalWin);
+			
 			if(typeof(cb) == 'function') cb();
+
+			modal.__triggerEvent(modalWin, 'close');
 		});
 		modal.openedModal[lvl] = null;
 	},
+
 	__switchTo: function(e) { // element
-		modal.__modalHide(function(){modal.__modalShow(e, true)});
+		modal.__modalHide(function() {
+			modal.__modalShow(e, true)
+		});
 	},
+
 	// TODO: if(!modal.animEndEvent) { count animation timeout to prevent bugs }
 	__animate: function(el, t, cb) { // element, type of animation, callback
 		var act, swch, add, rem;
@@ -170,10 +187,10 @@ var modal = {
 			modal.__removeClass(el, swch ? add.swch : add.dyn);
 			modal.__addClass(el, add.stat);
 			
-			if(typeof(cb) == 'function')
-				cb();
+			if(typeof(cb) == 'function') cb();
 		});
 	},
+
 	__modalsCollect: function() {
 		var cont, modals, i, len;
 		
@@ -188,6 +205,7 @@ var modal = {
 			modal.__addClass(modals[i], modal.config.hide.stat);
 		}
 	},
+
 	__anchorOpen: function() {
 		var anc;
 		
@@ -200,6 +218,7 @@ var modal = {
 			}
 		}
 	},
+
 	__scrollSet: function() {
 		var div, heightData;
 		
@@ -212,12 +231,14 @@ var modal = {
 
 		document.body.removeChild(div);
 	},
+
 	__keyPress: function(e) { // event
 		e.preventDefault();
 		
 		if(e.keyCode == modal.config.hideByKey)
 			modal.hide();
 	},
+
 	__getHeight: function() {
 		var yScroll, windowHeight;
 
@@ -239,6 +260,7 @@ var modal = {
 
 		return [windowHeight, yScroll]; // [height content window, all content height]
 	},
+
 	__setAnimatonEndEvent: function() {
 		var i, l, styles, events, prefixes, hash, block, styleSheet;
 		modal.animEndEvent = false;
@@ -251,7 +273,7 @@ var modal = {
 		// Generating testing styles
 		styles = '#' + hash + '{';
 		for(i = 0, l = prefixes.length; i < l; i++)
-			styles += prefixes[i] + 'animation:' + hash + '-anim 1ms;';
+			styles += prefixes[i] + 'animation:' + hash + '-anim 2ms;';
 		styles += '}';
 		for(i = 0, l = prefixes.length; i < l; i++)
 			styles += '@' + prefixes[i] + 'keyframes ' + hash + '-anim{from {left:0} to {left:1px}}';
@@ -268,16 +290,18 @@ var modal = {
 		document.body.appendChild(block);
 		
 		// Capture event
-		for(i = 0, l = events.length; i < l; i++)
+		for(i = 0, l = events.length; i < l; i++) (function(i) {
 			block.addEventListener(events[i], function(ev) {
 				if(!modal.animEndEvent) {
-					//console.log(ev.type);
-					modal.animEndEvent = ev.type;
+					modal.animEndEvent = events[i];
+
 					document.head.removeChild(styleSheet);
 					document.body.removeChild(block);
 				}
 			});
+		})(i);
 	},
+
 	__genStr: function(len) {
 		var i,
 			text = '',
@@ -288,18 +312,36 @@ var modal = {
 
 		return text;
 	},
+
+	__triggerEvent: function(el, evName, opt) {
+		var ev;
+
+		if(window.CustomEvent) {
+			ev = new CustomEvent(evName, opt);
+		} else {
+			ev = document.createEvent('CustomEvent');
+			ev.initCustomEvent(evName, true, true, opt);
+		}
+
+		el.dispatchEvent(ev);
+	},
+
 	__insertAfter: function(e, p) {
 		p.parentNode.insertBefore(e, p.nextSibling);
 	},
+
 	__addClass: function(e, c) {
 		var re = new RegExp('(^|\\s)' + c + '(\\s|$)', 'g');
 		if(!re.test(e.className))
 			e.className = (e.className + ' ' + c).replace(/\s+/g, ' ').replace(/(^ | $)/g, '');
 	},
+
 	__removeClass: function(e, c) {
 		var re = new RegExp('(^|\\s)' + c + '(\\s|$)', 'g');
 		e.className = e.className.replace(re, '$1').replace(/\s+/g, ' ').replace(/(^ | $)/g, '');
-	},
-	
+	}
 };
-window.addEventListener('DOMContentLoaded', function(){modal.init()});
+
+window.addEventListener('DOMContentLoaded', function() {
+	modal.init()
+});
